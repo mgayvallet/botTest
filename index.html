@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Mini App</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:      #0e0e0e;
+      --surface: #1c1c1c;
+      --border:  rgba(255,255,255,0.07);
+      --accent:  #2AABEE;
+      --purple:  #7c6fcd;
+      --text:    #f0f0f0;
+      --muted:   #777;
+      --r:       16px;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      padding: 20px 16px 110px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content:'';
+      position:fixed;
+      top:-150px; left:50%;
+      transform:translateX(-50%);
+      width:500px; height:500px;
+      background:radial-gradient(circle, rgba(42,171,238,.1) 0%, transparent 65%);
+      pointer-events:none;
+      z-index:0;
+    }
+
+    /* ── Header ── */
+    .header {
+      text-align:center;
+      margin-bottom:28px;
+      z-index:1;
+      animation: up .5s ease both;
+    }
+    .avatar {
+      width:68px; height:68px;
+      border-radius:50%;
+      background:linear-gradient(135deg,var(--accent),var(--purple));
+      display:flex; align-items:center; justify-content:center;
+      font-size:26px; margin:0 auto 12px;
+      box-shadow:0 0 0 5px rgba(42,171,238,.12);
+    }
+    .header h1 {
+      font-family:'Syne',sans-serif;
+      font-size:20px; font-weight:800;
+      letter-spacing:-.4px;
+    }
+    .header p { color:var(--muted); font-size:12px; margin-top:3px; }
+
+    /* ── Card ── */
+    .card {
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:var(--r);
+      padding:18px;
+      width:100%; max-width:400px;
+      margin-bottom:12px;
+      z-index:1;
+      animation: up .5s ease both;
+    }
+    .card:nth-child(2){animation-delay:.08s}
+    .card:nth-child(3){animation-delay:.16s}
+    .card:nth-child(4){animation-delay:.24s}
+
+    .label {
+      font-size:10px; font-weight:600;
+      text-transform:uppercase; letter-spacing:1.5px;
+      color:var(--accent); margin-bottom:12px;
+    }
+
+    /* ── User row ── */
+    .user-row { display:flex; align-items:center; gap:12px; }
+    .user-pic {
+      width:44px; height:44px; border-radius:50%;
+      background:linear-gradient(135deg,var(--accent),var(--purple));
+      display:flex; align-items:center; justify-content:center;
+      font-size:17px; font-family:'Syne',sans-serif; font-weight:700;
+      flex-shrink:0;
+    }
+    .user-name { font-family:'Syne',sans-serif; font-size:16px; font-weight:700; }
+    .user-id   { font-size:11px; color:var(--muted); margin-top:2px; }
+
+    /* ── Stats ── */
+    .stats { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .stat {
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:14px; text-align:center;
+    }
+    .stat-val {
+      font-family:'Syne',sans-serif;
+      font-size:20px; font-weight:800; color:var(--accent);
+    }
+    .stat-lbl { font-size:10px; color:var(--muted); margin-top:2px; }
+
+    /* ── Actions ── */
+    .actions { display:flex; flex-direction:column; gap:8px; }
+    .action {
+      display:flex; align-items:center; gap:12px;
+      padding:12px 14px;
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--border);
+      border-radius:12px;
+      cursor:pointer;
+      transition:background .2s, transform .15s;
+    }
+    .action:active { transform:scale(.97); background:rgba(42,171,238,.08); }
+    .action-icon {
+      width:36px; height:36px; border-radius:10px;
+      background:rgba(42,171,238,.1);
+      display:flex; align-items:center; justify-content:center;
+      font-size:16px; flex-shrink:0;
+    }
+    .action-title { font-size:14px; font-weight:500; }
+    .action-desc  { font-size:11px; color:var(--muted); margin-top:1px; }
+    .action-arrow { margin-left:auto; color:var(--muted); font-size:16px; }
+
+    /* ── Toast ── */
+    #toast {
+      position:fixed; bottom:88px; left:50%;
+      transform:translateX(-50%) translateY(10px);
+      background:#222; border:1px solid var(--border);
+      border-radius:30px; padding:9px 18px;
+      font-size:13px; opacity:0;
+      transition:all .28s ease;
+      pointer-events:none; z-index:999; white-space:nowrap;
+    }
+    #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+    @keyframes up {
+      from { opacity:0; transform:translateY(14px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="avatar">🤖</div>
+  <h1>aboulayDiopBOT</h1>
+  <p>Tableau de bord</p>
+</div>
+
+<!-- Profil -->
+<div class="card">
+  <div class="label">Profil</div>
+  <div class="user-row">
+    <div class="user-pic" id="userPic">?</div>
+    <div>
+      <div class="user-name" id="userName">Chargement…</div>
+      <div class="user-id"  id="userId"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="card">
+  <div class="label">Session</div>
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-val" id="platform">—</div>
+      <div class="stat-lbl">Plateforme</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" id="version">—</div>
+      <div class="stat-lbl">Version</div>
+    </div>
+  </div>
+</div>
+
+<!-- Actions -->
+<div class="card">
+  <div class="label">Actions</div>
+  <div class="actions">
+    <div class="action" onclick="send('profil')">
+      <div class="action-icon">👤</div>
+      <div><div class="action-title">Mon profil</div><div class="action-desc">Voir mes infos</div></div>
+      <div class="action-arrow">›</div>
+    </div>
+    <div class="action" onclick="send('aide')">
+      <div class="action-icon">💬</div>
+      <div><div class="action-title">Aide</div><div class="action-desc">Contacter le support</div></div>
+      <div class="action-arrow">›</div>
+    </div>
+    <div class="action" onclick="send('partager')">
+      <div class="action-icon">🔗</div>
+      <div><div class="action-title">Partager</div><div class="action-desc">Inviter des amis</div></div>
+      <div class="action-arrow">›</div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  const tg   = window.Telegram.WebApp;
+  const user = tg.initDataUnsafe?.user;
+
+  tg.ready();
+  tg.expand();
+
+  // Profil
+  if (user) {
+    const full = `${user.first_name}${user.last_name ? ' '+user.last_name : ''}`;
+    const initials = (user.first_name[0]||'') + (user.last_name?.[0]||'');
+    document.getElementById('userName').textContent = full;
+    document.getElementById('userId').textContent   = `ID : ${user.id}`;
+    document.getElementById('userPic').textContent  = initials || '👤';
+  } else {
+    document.getElementById('userName').textContent = 'Invité';
+    document.getElementById('userId').textContent   = 'Ouvre via Telegram';
+  }
+
+  // Stats
+  const p = tg.platform || 'web';
+  document.getElementById('platform').textContent = p.charAt(0).toUpperCase() + p.slice(1);
+  document.getElementById('version').textContent  = tg.version || '—';
+
+  // Bouton principal
+  tg.MainButton.setText('✅ Confirmer');
+  tg.MainButton.color = '#2AABEE';
+  tg.MainButton.show();
+  tg.MainButton.onClick(() => {
+    tg.sendData(JSON.stringify({ action:'confirm', userId: user?.id }));
+    toast('✅ Confirmé !');
+  });
+
+  function send(action) {
+    tg.sendData(JSON.stringify({ action, userId: user?.id, ts: Date.now() }));
+    toast(`📤 ${action} envoyé`);
+  }
+
+  function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2400);
+  }
+</script>
+</body>
+</html>
